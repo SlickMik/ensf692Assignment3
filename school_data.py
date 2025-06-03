@@ -13,10 +13,11 @@ from given_data import year_2013, year_2014, year_2015, year_2016, year_2017, ye
 
 # Declare any global variables needed to store the data here
 
+# ***REFERENCE ONLY***
+# The shape of the array are [10,20,3]
+# Structure of the array is [years, school, grade]
 
-# The dimensions of the array are [10,20,3]
-# The structure of the array is [years, school, grade]
-
+#Variable that stores data from imported arrays
 data = np.array([
     year_2013,
     year_2014,
@@ -31,9 +32,11 @@ data = np.array([
 ])
 
 
+# Data store the reshaped array
 data = np.array([year.reshape(20, 3) for year in data])
 
 
+#List of schools 
 schools = {
     1224: "Centennial High School",
     1679: "Robert Thirsk School",
@@ -58,53 +61,90 @@ schools = {
 }
 
 
+schoolsalt = {
+    "Centennial High School": 1224,
+    "Robert Thirsk School": 1679,
+    "Louise Dean School": 9626,
+    "Queen Elizabeth High School": 9806,
+    "Forest Lawn High School": 9813,
+    "Crescent Heights High School": 9815,
+    "Western Canada High School": 9816,
+    "Central Memorial High School": 9823,
+    "James Fowler High School": 9825,
+    "Ernest Manning High School": 9826,
+    "William Aberhart High School": 9829,
+    "National Sport School": 9830,
+    "Henry Wise Wood High School": 9836,
+    "Bowness High School": 9847,
+    "Lord Beaverbrook High School": 9850,
+    "Jack James High School": 9856,
+    "Sir Winston Churchill High School": 9857,
+    "Dr. E. P. Scarlett High School": 9858,
+    "John G Diefenbaker High School": 9860,
+    "Lester B. Pearson High School": 9865
+}
 
 
-school_names = {v: k for k, v in schools.items()}
 
 
-school_data_by_code = {code: data[:, idx, :] for idx, code in enumerate(schools.keys())}
-
-school_data_by_name = {name : data[:, idx, :] for idx, name in enumerate(schools.values())}
-
-
-
-
+# Function that returns the index of the school as entered by the user. The 
+# method parses through the list of schools and returns the index of the match.
+# if code is of type "int" then return index from schools dictionary 
+# if code is of type "string" then return index from schoolalt dictionary
 def get_school_index(code):
-    if (code in schools):
+    if isinstance(code, int):
         school_list = list(schools.keys())
-        print("The index of code is ", school_list.index(code))
         return school_list.index(code)
+    else:
+        code = schoolsalt[code]
+        school_list = list(schools.keys())
+        return school_list.index(code)
+
 
  
 
 
-
+#main function
 def main():
     print("ENSF 692 School Enrollment Statistics")
 
-  
-    
     
     # Print Stage 1 requirements here
-    print(data.shape)
-    print(data.ndim)
+    print("Shape of the full data array: ", data.shape)
+    print("Dumestions of the full data array:", data.ndim)
 
     
-    # Prompt for user input
+   
     selection = input("Please enter a highschool name or code:")
 
 
     # Print Stage 2 requirements here
     print("\n***Requested School Statistics***\n")
+
+    #Ensures that user enters valid input
     try:
         key = int(selection)
-        print("Int has been entered")
-        print("School name:", schools[key], ", School Code: ",key)
+        if key not in schools:
+            raise ValueError
     except ValueError:
+        if selection not in schools.values():
+            print("You must enter a valid school name or code.")
+            return
         key = selection
         
     school_data = data[:,get_school_index(key),:]
+
+    # Print the school name and code
+    if isinstance(key, int):
+        school_name = schools[key]
+        school_code = key
+    else:
+        school_name = key
+        school_code = schoolsalt[key]
+
+
+    print("School Name:", school_name)
+    print("School Code: ", school_code)
 
     mean = np.nanmean(school_data, axis=0)
     highest = np.max(school_data)
@@ -123,20 +163,10 @@ def main():
     
 
     print("Total ten year enrollment: ", int(np.sum(total_year)))
-    
-  
-
-   
+    print("Mean total enrollment over 10 years",int(np.mean(total_year)) )
 
     all_enrolments_over_500 = school_data[school_data > 500]
-
-
     print("For all enrollments over 500, the median value was:  ", int(np.median(all_enrolments_over_500)))
-
-
-
-
-
 
 
 
@@ -145,6 +175,7 @@ def main():
     print("\n***General Statistics for All Schools***\n")
  
 
+    #nan Ufunc's are used to eliminate any null values
     print("Mean enrollment in 2013:", int(np.nanmean(data[0])))
     print("Mean enrollment in 2022:", int(np.nanmean(data[9])))
     print("Total 2022 graduates:", int(np.nansum(data[9,:,2])))
